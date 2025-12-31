@@ -41,31 +41,29 @@ async function fetchCoursesData(courseCodes, termId) {
  * @returns {Promise<Object>} Course object with all sections
  */
 async function fetchSingleCourse(courseCode, termId) {
-    // Parse department from course code (e.g., "CSCI" from "CSCI-350")
     const [dept, number] = courseCode.split('-');
-
     if (!dept || !number) {
         throw new Error(`Invalid course code format: ${courseCode}. Expected format: DEPT-NUMBER (e.g., CSCI-350)`);
     }
-
     console.log(`📖 Fetching ${courseCode} from ${dept} department`);
-
-    // Strategy: Fetch the department page and parse it
-    // WebReg uses /Courses?Program=DEPT format
-    const departmentUrl = `/Courses?Program=${dept}`;
-
-    try {
-        // Fetch department page HTML
-        const html = await fetchDepartmentPage(departmentUrl);
-
-        // Parse the HTML to find our course and extract sections
-        const courseData = parseCourseFromHTML(html, courseCode);
-
-        return courseData;
-
-    } catch (error) {
-        console.error(`Failed to fetch ${courseCode}:`, error);
-        throw error;
+    // PAGINATION FIX: Search multiple pages
+    const MAX_PAGES = 10;
+    for (let pageNum = 1; pageNum <= MAX_PAGES; pageNum++) {
+        const departmentUrl = pageNum === 1
+            ? `/Courses?Program=${dept}`
+            : `/Courses?pageNumber=${pageNum}&Program=${dept}`;
+        console.log(`  📄 Checking page ${pageNum}...`);
+        try {
+            const html = await fetchDepartmentPage(departmentUrl);
+            const courseData = parseCourseFromHTML(html, courseCode);
+            console.log(`  ✓ Found ${courseCode} on page ${pageNum}`);
+            return courseData;
+        } catch (parseError) {
+            // Course not on this page, try next
+            if (pageNum === MAX_PAGES) {
+                throw new Error(`Course ${courseCode} not found after checking ${MAX_PAGES} pages`);
+            }
+        }
     }
 }
 

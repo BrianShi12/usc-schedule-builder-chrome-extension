@@ -162,9 +162,22 @@ function placeSectionOnCalendar(section, tbody, courseColors) {
         block.style.height = `${durationInHours * 40 - 4}px`; // 40px per hour row minus margin
 
         // Block content - Format: COURSE-CODE (sectionId) on line 1, time on line 2
+        // SECURITY: Use textContent instead of innerHTML to prevent XSS
         const courseLabel = `${section.courseCode || 'Unknown'} (${section.sectionId})`;
         const startTime = section.time ? section.time.split('-')[0] : '';
-        block.innerHTML = `${courseLabel}<br><span class="course-block-time">${startTime}</span>`;
+
+        // Create text node for course label (safe from XSS)
+        const labelText = document.createTextNode(courseLabel);
+        block.appendChild(labelText);
+
+        // Add line break
+        block.appendChild(document.createElement('br'));
+
+        // Add time span
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'course-block-time';
+        timeSpan.textContent = startTime;
+        block.appendChild(timeSpan);
 
         // Tooltip
         block.title = `${section.courseCode} - ${section.type}\n${section.time} on ${section.days}\nSection ${section.sectionId}\n${section.instructor} @ ${section.location}`;
