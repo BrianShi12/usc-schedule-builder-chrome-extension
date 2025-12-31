@@ -58,7 +58,7 @@ function injectScheduleBuilderTab() {
   const scheduleBuilderLink = document.createElement('a');
   scheduleBuilderLink.id = 'mItSchBld';
   scheduleBuilderLink.href = '#';
-  scheduleBuilderLink.textContent = 'Schedule Builder';
+  scheduleBuilderLink.textContent = 'myScheduleBuilder';
 
   // Style as inactive by default (white text, no background)
   scheduleBuilderLink.style.color = 'rgb(255, 255, 255)';
@@ -166,7 +166,7 @@ function activateScheduleBuilderTab() {
     // Push new state to history
     history.pushState(
       { page: 'schedulebuilder' },
-      'Schedule Builder',
+      'myScheduleBuilder',
       window.location.pathname + '#schedulebuilder'
     );
   }
@@ -305,7 +305,7 @@ function getScheduleBuilderHTML() {
         <div class="schedule-builder-content">
           <!-- Clean Header -->
           <div class="schedule-builder-header">
-            <h1>Schedule Builder</h1>
+            <h1>myScheduleBuilder</h1>
             <p>This Schedule Builder tool allows you to generate all possible valid schedule combinations from your selected courses. Enter your course codes below to see available scheduling options.</p>
           </div>
 

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "USC Schedule Builder",
   "version": "1.0.0",
-  "description": "Automatically generates all possible valid schedule combinations from your USC WebReg CourseBin",
+  "description": "Automatically generates all possible valid schedule combinations",
   "permissions": [
     "activeTab",
     "storage"

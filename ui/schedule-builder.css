@@ -15,31 +15,74 @@
     background-color: transparent !important;
 }
 
+/* ============================================================================
+ * PERMANENT FIX: Force parent containers to grow with dynamic content
+ * ============================================================================
+ * 
+ * ROOT CAUSE: USC's CSS sets .layout-container to height: 100% (viewport height)
+ * which prevents it from growing when we inject long schedule content.
+ * 
+ * SOLUTION: Override with height: auto !important to allow natural growth
+ * 
+ * VERIFIED: Browser investigation showed parent containers stuck at 779px while
+ * content extended to 1225px, causing gray gap at bottom.
+ * 
+ * UPDATE: Increased selector specificity to override USC's styles effectively
+ */
+
+/* Force html and body to auto-grow */
+html,
+body {
+    height: auto !important;
+}
+
+/* Force parent containers to auto-grow with higher specificity */
+body.departments-page .layout-container,
+body.departments-page #sb-site,
+body .layout-container,
+body #sb-site {
+    height: auto !important;
+    min-height: 100% !important;
+}
+
+/* Backup: Ensure white background extends to page level */
+body.departments-page .page-background,
+body .page-background {
+    background-color: #fff !important;
+}
+
+/* End of permanent fix */
+
 .navbar .dropdown-menu>li>a:hover {
     background-color: #f5f5f5 !important;
 }
 
-/* Container styling - ensures white background extends full page
+/* Container styling - ensures white background extends with content
  * 
  * Key properties:
- * - min-height: 100vh ensures background extends down entire viewport
- * - background-color: white background (since #sb-site may collapse)
- * - margin-top: -15px overlays the navbar (WebReg standard)
- * - box-shadow: depth effect matching native pages
+ * - display: flow-root establishes block formatting context (fixes float collapse)
+ * - min-height: 100vh ensures background covers at least viewport
+ * - height: auto allows container to grow with content
+ * - background-color: white background
+ * - margin-top: -25px compensates for navbar's 20px margin-bottom
+ * - box-shadow: directional shadow (down/sides only, prevents upward bleed)
  * - z-index: ensures content sits above navbar
  */
 #schedule-builder-container {
+    display: flow-root !important;
+    /* Fixes container collapse from floated Bootstrap columns */
     position: relative;
     background-color: #fff;
-    min-height: 100vh;
-    /* Extend to full viewport height */
+    height: auto !important;
+    min-height: 100vh !important;
+    /* Ensures minimum viewport height but grows with content */
     width: 100%;
-    margin-top: -15px;
-    /* Overlay navbar (WebReg's standard) */
+    margin-top: -25px;
+    /* Overlay navbar fully (navbar has 20px margin-bottom) */
     z-index: 1;
     /* Stack on top of navbar */
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-    /* Depth effect */
+    box-shadow: 0 15px 15px -5px rgba(0, 0, 0, 0.5);
+    /* Downward shadow only, negative spread prevents upward bleed */
     font-family: National, "Helvetica Neue", Helvetica, Arial, sans-serif;
     padding: 15px 15px 20px;
     /* Match myCalendar: Top/Left/Right: 15px, Bottom: 20px */
