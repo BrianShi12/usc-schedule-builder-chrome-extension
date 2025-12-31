@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "USC Schedule Builder",
+  "version": "1.0.0",
+  "description": "Automatically generates all possible valid schedule combinations from your USC WebReg CourseBin",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://webreg.usc.edu/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://webreg.usc.edu/*"
+      ],
+      "js": [
+        "core/time-parser.js",
+        "core/course-fetcher.js",
+        "core/schedule-generator.js",
+        "core/calendar-renderer.js",
+        "ui/tab-injector.js"
+      ],
+      "css": [
+        "ui/schedule-builder.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "USC Schedule Builder"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

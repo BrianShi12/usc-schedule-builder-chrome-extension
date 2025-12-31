@@ -1,0 +1,497 @@
+/**
+ * USC Schedule Builder - UI Styling (v0-inspired clean design)
+ * 
+ * Matches WebReg's clean, professional aesthetic
+ * USC Cardinal Red (#990000) and Gold (#FFCC00)
+ */
+
+/* Prevent our styles from affecting WebReg dropdown menus */
+.dropdown-menu a {
+    color: #333 !important;
+}
+
+.navbar .dropdown-menu>li>a {
+    color: #333 !important;
+    background-color: transparent !important;
+}
+
+.navbar .dropdown-menu>li>a:hover {
+    background-color: #f5f5f5 !important;
+}
+
+/* Container styling - ensures white background extends full page
+ * 
+ * Key properties:
+ * - min-height: 100vh ensures background extends down entire viewport
+ * - background-color: white background (since #sb-site may collapse)
+ * - margin-top: -15px overlays the navbar (WebReg standard)
+ * - box-shadow: depth effect matching native pages
+ * - z-index: ensures content sits above navbar
+ */
+#schedule-builder-container {
+    position: relative;
+    background-color: #fff;
+    min-height: 100vh;
+    /* Extend to full viewport height */
+    width: 100%;
+    margin-top: -15px;
+    /* Overlay navbar (WebReg's standard) */
+    z-index: 1;
+    /* Stack on top of navbar */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    /* Depth effect */
+    font-family: National, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    padding: 15px 15px 20px;
+    /* Match myCalendar: Top/Left/Right: 15px, Bottom: 20px */
+}
+
+/* Headers - Match myCalendar h3 styling (measured from native page) */
+.schedule-builder-header h1 {
+    font-size: 27px;
+    /* Exact match to myCalendar h3 */
+    font-weight: 400;
+    /* Regular weight, not medium */
+    line-height: 37.8px;
+    /* 1.4 ratio */
+    margin: 3.2px 0px 8px;
+    /* Exact match to myCalendar */
+    color: #222222;
+    /* Slightly lighter black */
+    font-family: inherit;
+}
+
+/* Body text - Match myCalendar paragraph styling (measured from native page) */
+.schedule-builder-header p {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 25.6px;
+    /* Exact match: 1.6 ratio of 16px */
+    color: #000000;
+    margin-bottom: 20px;
+    font-family: inherit;
+}
+
+/* Input Section */
+.input-section {
+    margin-bottom: 25px;
+}
+
+.input-section label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 16px;
+    /* Match myCalendar labels */
+    font-weight: 400;
+    /* Regular weight, not bold */
+    line-height: 24px;
+    color: #000000;
+    font-family: inherit;
+}
+
+.input-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.course-input {
+    flex: 1;
+    min-width: 400px;
+    /* Wider input box to show more course codes */
+    padding: 6px 12px;
+    /* WebReg's input padding */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    /* WebReg's border-radius */
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.course-input:focus {
+    outline: none;
+    border-color: #999;
+}
+
+/* Buttons - Match WebReg's button style */
+.btn {
+    padding: 6px 12px;
+    /* WebReg's button padding */
+    border: 1px solid #990000;
+    /* USC Cardinal border */
+    border-radius: 4px;
+    /* WebReg's border-radius */
+    font-size: 14px;
+    font-weight: 400;
+    /* Normal weight like WebReg */
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    background-color: white;
+    color: #666;
+    /* WebReg's button text color */
+}
+
+.btn-primary {
+    background-color: #990000;
+    /* USC Cardinal for primary actions */
+    color: white;
+    border-color: #990000;
+}
+
+.btn-primary:hover {
+    background-color: #770000;
+}
+
+.btn-secondary {
+    background-color: #fff;
+    color: #666;
+    /* Match WebReg's grey text */
+    border: 1px solid #990000;
+    /* USC Cardinal border */
+    border-radius: 4px;
+}
+
+.btn-secondary:hover {
+    background-color: #f5f5f5;
+}
+
+.btn-success {
+    background-color: #5cb85c;
+    color: white;
+    border: 1px solid #4cae4c;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    padding: 10px 16px;
+}
+
+.btn-success:hover {
+    background-color: #4cae4c;
+}
+
+/* Availability Stats - Match WebReg's info box styling */
+.availability-stats {
+    background-color: #EFEEEA;
+    /* WebReg's light beige-grey */
+    padding: 15px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    border: 0;
+    font-family: inherit;
+}
+
+.availability-stats h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #000;
+    font-family: inherit;
+}
+
+.course-availability {
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.course-code {
+    font-weight: 600;
+    /* Less heavy than bold */
+    color: #990000;
+    margin-right: 8px;
+}
+
+.availability-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+.badge-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.badge-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.badge-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.section-details {
+    font-size: 12px;
+    color: #666;
+    margin-left: 4px;
+}
+
+/* Schedule Navigation */
+.schedule-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.schedule-nav a {
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background-color: #fff;
+    transition: all 0.2s;
+}
+
+.schedule-nav a:hover {
+    background-color: #f5f5f5;
+    border-color: #999;
+}
+
+.schedule-counter {
+    font-size: 14px;
+    color: #990000;
+    /* USC Cardinal red */
+    font-weight: bold;
+}
+
+/* Main Schedule Display - Side-by-side layout */
+.schedule-display-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* Calendar Section - Table-based grid */
+.calendar-section {
+    flex: 1 1 70%;
+}
+
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #ccc;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    background-color: white;
+}
+
+.calendar-table th {
+    background-color: #f5f5f5;
+    padding: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    border: 1px solid #ccc;
+    text-align: center;
+    color: #000;
+}
+
+.calendar-table th.time-header {
+    width: 70px;
+    text-align: left;
+    background-color: #f5f5f5;
+}
+
+.calendar-table td {
+    border: 1px solid #ccc;
+    padding: 0;
+    position: relative;
+    height: 40px;
+    background-color: #fff;
+}
+
+.calendar-table td.time-cell {
+    background-color: #f9f9f9;
+    padding: 4px 6px;
+    font-size: 11px;
+    font-weight: normal;
+    vertical-align: top;
+    color: #000;
+}
+
+/* Course blocks in calendar */
+.course-block {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    background-color: #70ad47;
+    /* USC-friendly green */
+    color: white;
+    padding: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    overflow: hidden;
+    border: 1px solid #5a9437;
+    border-radius: 2px;
+    z-index: 1;
+}
+
+.course-block:hover {
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.course-block-time {
+    font-size: 9px;
+    font-weight: normal;
+    margin-top: 2px;
+}
+
+/* Details Panel - Right side */
+.details-panel {
+    flex: 1 1 30%;
+    min-width: 280px;
+}
+
+.details-card {
+    border: 1px solid #ccc;
+    background-color: #fdf9f3;
+    padding: 20px;
+    /* Increased padding */
+    margin-bottom: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.details-card h3 {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0 0 12px 0;
+    border-bottom: 2px solid #990000;
+    padding-bottom: 6px;
+    color: #000;
+}
+
+.details-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.details-list li {
+    font-size: 12px;
+    line-height: 1.7;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.details-list li:last-child {
+    border-bottom: none;
+}
+
+.detail-type {
+    font-weight: bold;
+    color: #000;
+}
+
+.detail-time {
+    color: #000;
+}
+
+.detail-instructor {
+    color: #666;
+}
+
+/* Action Buttons Container */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Loading Section */
+.loading-section {
+    text-align: center;
+    padding: 40px;
+}
+
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #990000;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px auto;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-text {
+    font-size: 18px;
+    color: #333;
+    margin: 10px 0;
+}
+
+.loading-progress {
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Error Section */
+.error-section {
+    text-align: center;
+    padding: 30px;
+}
+
+.error-text {
+    color: #dc3545;
+    font-size: 16px;
+    margin: 15px 0;
+    padding: 15px;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .schedule-display-container {
+        flex-direction: column;
+    }
+
+    .calendar-section {
+        flex: 1 1 100%;
+    }
+
+    .details-panel {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .schedule-builder-content {
+        padding: 10px;
+    }
+
+    .input-group {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .calendar-table th,
+    .calendar-table td {
+        font-size: 11px;
+        padding: 2px;
+    }
+}

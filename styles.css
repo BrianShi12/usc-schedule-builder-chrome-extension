@@ -1,0 +1,54 @@
+/**
+ * USC Schedule Builder - Custom Styles
+ * 
+ * Styles for the injected "Generate Potential Schedules" button
+ * to match USC's design aesthetic
+ */
+
+/* Custom button styling */
+.schedule-generator-btn {
+  margin-left: 10px !important;
+  padding: 8px 16px !important;
+  background: linear-gradient(135deg, #990000 0%, #cc0000 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 4px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  text-decoration: none !important;
+  display: inline-block !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.schedule-generator-btn:hover {
+  background: linear-gradient(135deg, #cc0000 0%, #ff0000 100%) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(-1px) !important;
+  color: white !important;
+  text-decoration: none !important;
+}
+
+.schedule-generator-btn:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Loading state (for future use) */
+.schedule-generator-btn.loading {
+  opacity: 0.7 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
+.schedule-generator-btn.loading::after {
+  content: " ..." !important;
+  animation: loadingDots 1.5s infinite !important;
+}
+
+@keyframes loadingDots {
+  0%, 20% { content: " ." !important; }
+  40% { content: " .." !important; }
+  60%, 100% { content: " ..." !important; }
+}
