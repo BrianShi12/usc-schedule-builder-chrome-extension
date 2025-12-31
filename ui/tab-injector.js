@@ -5,7 +5,7 @@
  * next to myCourseBin and myCalendar tabs
  */
 
-console.log('🔧 Schedule Builder Tab Injector loaded');
+debugLog('🔧 Schedule Builder Tab Injector loaded');
 
 /**
  * Main initialization function for tab injection
@@ -13,18 +13,18 @@ console.log('🔧 Schedule Builder Tab Injector loaded');
 function injectScheduleBuilderTab() {
   // Only run on WebReg pages
   if (!window.location.hostname.includes('webreg.usc.edu')) {
-    console.log('Not on WebReg, skipping tab injection');
+    debugLog('Not on WebReg, skipping tab injection');
     return;
   }
 
   // CRITICAL: Don't inject on login page
   // Login URL: https://webreg.usc.edu/Login?ReturnUrl=%2FTerms
   if (window.location.pathname.includes('/Login')) {
-    console.log('On login page - skipping injection');
+    debugLog('On login page - skipping injection');
     return;
   }
 
-  console.log('✅ On authenticated WebReg page - attempting to inject Schedule Builder tab');
+  debugLog('✅ On authenticated WebReg page - attempting to inject Schedule Builder tab');
 
   // Find the navigation bar
   const navBar = document.querySelector('ul.nav.navbar-nav');
@@ -46,7 +46,7 @@ function injectScheduleBuilderTab() {
 
   // Check if Schedule Builder tab already exists (prevent duplicates)
   if (document.getElementById('mItSchBld')) {
-    console.log('Schedule Builder tab already exists');
+    debugLog('Schedule Builder tab already exists');
     return;
   }
 
@@ -95,7 +95,7 @@ function injectScheduleBuilderTab() {
   // Add event listeners to OTHER tabs to hide Schedule Builder when they're clicked
   setupTabCleanupListeners();
 
-  console.log('✅ Schedule Builder tab injected successfully!');
+  debugLog('✅ Schedule Builder tab injected successfully!');
 }
 
 /**
@@ -127,7 +127,7 @@ function setupTabCleanupListeners() {
         }
       }
 
-      console.log('🔄 Switched to WebReg content');
+      debugLog('🔄 Switched to WebReg content');
     });
   });
 }
@@ -136,7 +136,7 @@ function setupTabCleanupListeners() {
  * Activate the Schedule Builder tab and show its content
  */
 function activateScheduleBuilderTab() {
-  console.log('🎯 Schedule Builder tab activated!');
+  debugLog('🎯 Schedule Builder tab activated!');
 
   // Deactivate all other tabs
   const allTabs = document.querySelectorAll('ul.nav.navbar-nav li');
@@ -240,15 +240,15 @@ function createScheduleBuilderContainer(sbSite) {
     // Inject inside #sb-site (not as a sibling!)
     sbSite.appendChild(scheduleBuilderContainer);
 
-    console.log('✅ Created Schedule Builder container inside #sb-site');
+    debugLog('✅ Created Schedule Builder container inside #sb-site');
   } else {
     // Clear and show existing container
     scheduleBuilderContainer.innerHTML = '';
     scheduleBuilderContainer.style.display = 'block';
-    console.log('✅ Reusing existing Schedule Builder container');
+    debugLog('✅ Reusing existing Schedule Builder container');
   }
 
-  console.log('✅ Cleared main content container');
+  debugLog('✅ Cleared main content container');
   return scheduleBuilderContainer;
 }
 
@@ -269,7 +269,7 @@ function renderScheduleBuilderUI() {
   // Attach event listeners
   attachScheduleBuilderEventListeners();
 
-  console.log('✅ Schedule Builder UI rendered');
+  debugLog('✅ Schedule Builder UI rendered');
 
   // Try to load saved schedules from storage
   loadSchedulesFromStorage();
@@ -277,7 +277,7 @@ function renderScheduleBuilderUI() {
   // Legacy: Restore state if schedules were previously generated (in-memory)
   // This handles cases where schedules exist but haven't been saved yet
   if (window.currentSchedules && window.currentSchedules.length > 0) {
-    console.log(`🔄 Restoring previous state with ${window.currentSchedules.length} schedules`);
+    debugLog(`🔄 Restoring previous state with ${window.currentSchedules.length} schedules`);
 
     // Hide input section and loading
     // Keep input section visible for easy editing
@@ -367,6 +367,11 @@ function getScheduleBuilderHTML() {
 
               <!-- Details Panel (Right - 30%) -->
               <div class="details-panel">
+                <!-- Linked Section Warning -->
+                <div class="alert alert-warning" style="font-size: 13px; margin-bottom: 15px; padding: 10px;">
+                  ⚠️ <strong>Note:</strong> Some lectures require specific discussions. Please verify your combination on WebReg.
+                </div>
+
                 <!-- Section Details Card -->
                 <div class="details-card">
                   <h3>Sections in This Schedule:</h3>
@@ -377,9 +382,11 @@ function getScheduleBuilderHTML() {
 
                 <!-- Action Buttons -->
                 <div class="action-buttons">
+                  <!-- Button hidden per user request (feature incomplete)
                   <button id="addToCourseBinBtn" class="btn btn-success">
                     ✓ Add This Schedule to CourseBin
                   </button>
+                  -->
                   <button id="startOverBtn" class="btn btn-secondary">
                     Start Over
                   </button>
@@ -467,7 +474,7 @@ function attachScheduleBuilderEventListeners() {
  * Handle Generate Schedules button click
  */
 async function handleGenerateSchedules() {
-  console.log('🎯 Generate Schedules clicked!');
+  debugLog('🎯 Generate Schedules clicked!');
 
   const input = document.getElementById('courseInput');
   const courseCodes = input.value.trim();
@@ -480,7 +487,7 @@ async function handleGenerateSchedules() {
   // Parse course codes
   const courses = courseCodes.split(',').map(c => c.trim().toUpperCase()).filter(c => c.length > 0);
 
-  console.log('Courses to process:', courses);
+  debugLog('Courses to process:', courses);
 
   // Show loading state
   showLoading();
@@ -502,7 +509,7 @@ async function handleGenerateSchedules() {
     // Fetch all course data
     const coursesData = await window.ScheduleBuilder.fetchCoursesData(courses, termId);
 
-    console.log('✅ Fetched course data:', coursesData);
+    debugLog('✅ Fetched course data:', coursesData);
 
     // Check for errors
     const failedCourses = coursesData.filter(c => c.error || c.sections.length === 0);
@@ -547,13 +554,13 @@ async function handleGenerateSchedules() {
       // Log filtering stats
       const totalSections = successCourses.reduce((sum, c) => sum + c.sections.length, 0);
       const openSections = coursesToUse.reduce((sum, c) => sum + c.sections.length, 0);
-      console.log(`📊 Filtered sections: ${openSections} open out of ${totalSections} total`);
+      debugLog(`📊 Filtered sections: ${openSections} open out of ${totalSections} total`);
     } else {
-      console.log('ℹ️ Including all sections (open and closed)');
+      debugLog('ℹ️ Including all sections (open and closed)');
     }
 
     // Phase 3: Generate schedules
-    console.log('🎯 Starting schedule generation...');
+    debugLog('🎯 Starting schedule generation...');
 
     if (!window.ScheduleBuilder || !window.ScheduleBuilder.generateSchedules) {
       showError('Schedule generator not loaded. Please reload the extension.');
@@ -577,7 +584,7 @@ async function handleGenerateSchedules() {
         // Show the schedules
         showGeneratedSchedules(schedules, coursesToUse, failedCourses);
       } catch (error) {
-        console.error('Error generating schedules:', error);
+        debugLog('Error generating schedules:', error);
         showError(`Failed to generate schedules: ${error.message}`);
       }
     }, 100);
@@ -592,7 +599,7 @@ async function handleGenerateSchedules() {
  * Show generated schedules (replaces showFetchedCourses)
  */
 function showGeneratedSchedules(schedules, successCourses, failedCourses) {
-  console.log(`✅ Displaying ${schedules.length} schedules`);
+  debugLog(`✅ Displaying ${schedules.length} schedules`);
 
   // Store schedules globally for navigation
   window.currentSchedules = schedules;
@@ -696,7 +703,7 @@ function navigateSchedule(direction) {
  * Handle Add to CourseBin button
  */
 function handleAddToCourseBin() {
-  console.log('Add to CourseBin clicked!');
+  debugLog('Add to CourseBin clicked!');
   // TODO: Phase 5 - Implement auto-add functionality
   alert('Auto-add feature coming in Phase 5!');
 }
@@ -715,9 +722,9 @@ function saveSchedulesToStorage(schedules, index = 0) {
     'sb_inputCourses': inputValue
   }, () => {
     if (chrome.runtime.lastError) {
-      console.error('Error saving schedules:', chrome.runtime.lastError);
+      debugLog('Error saving schedules:', chrome.runtime.lastError);
     } else {
-      console.log(`📦 Saved ${schedules.length} schedules to storage`);
+      debugLog(`📦 Saved ${schedules.length} schedules to storage`);
     }
   });
 }
@@ -771,7 +778,7 @@ function loadSchedulesFromStorage() {
       // Display current schedule
       displaySchedule(window.currentScheduleIndex);
 
-      console.log(`✅ Restored ${result.sb_schedules.length} schedules from storage`);
+      debugLog(`✅ Restored ${result.sb_schedules.length} schedules from storage`);
     }
   });
 }
@@ -786,7 +793,7 @@ function clearSavedSchedules() {
     'sb_timestamp',
     'sb_inputCourses'
   ], () => {
-    console.log('🗑️ Cleared saved schedules');
+    debugLog('🗑️ Cleared saved schedules');
     // Reset UI
     window.currentSchedules = null;
     window.currentScheduleIndex = 0;
@@ -898,7 +905,7 @@ function updateLoadingProgress(message) {
  * Handle browser back/forward navigation
  */
 window.addEventListener('popstate', (event) => {
-  console.log('🔄 Navigation detected (back/forward button)');
+  debugLog('🔄 Navigation detected (back/forward button)');
 
   // Check if we should show Schedule Builder based on URL hash
   if (window.location.hash === '#schedulebuilder') {

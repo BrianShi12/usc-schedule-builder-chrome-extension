@@ -4,9 +4,7 @@
  * Generates all valid schedule combinations using backtracking algorithm
  */
 
-const DEBUG = false;
-const debugLog = DEBUG ? console.log.bind(console) : () => { };
-
+// DEBUG declaration removed - inherits from time-parser.js
 debugLog('📅 Schedule Generator module loaded');
 
 /**
