@@ -4,15 +4,18 @@
  * Generates all valid schedule combinations using backtracking algorithm
  */
 
-console.log('📅 Schedule Generator module loaded');
+const DEBUG = false;
+const debugLog = DEBUG ? console.log.bind(console) : () => { };
+
+debugLog('📅 Schedule Generator module loaded');
 
 /**
  * Generate valid schedules from course data
  */
 function generateSchedules(coursesData, maxSchedules = 20) {
-    console.log('🔄 Starting schedule generation');
-    console.log(`Courses to schedule: ${coursesData.length}`);
-    console.log(`Max schedules requested: ${maxSchedules}`);
+    debugLog('🔄 Starting schedule generation');
+    debugLog(`Courses to schedule: ${coursesData.length}`);
+    debugLog(`Max schedules requested: ${maxSchedules}`);
 
     // Group sections by course and type
     const coursesSections = groupSectionsByType(coursesData);
@@ -26,7 +29,7 @@ function generateSchedules(coursesData, maxSchedules = 20) {
 
     // Count actual valid lecture combinations (non-conflicting)
     const validLectureCombos = countValidLectureCombinations(coursesSections);
-    console.log(`📊 DEBUG: Found ${validLectureCombos} valid (non-conflicting) lecture combinations`);
+    debugLog(`📊 DEBUG: Found ${validLectureCombos} valid (non-conflicting) lecture combinations`);
 
     // Adaptively determine how many variants per lecture combo
     // If many lecture combos: focus on lecture diversity (1-2 variants each)
@@ -35,9 +38,9 @@ function generateSchedules(coursesData, maxSchedules = 20) {
         ? Math.max(1, Math.ceil(maxSchedules / validLectureCombos))
         : maxSchedules;
 
-    console.log(`📈 DEBUG: maxSchedules=${maxSchedules}, validLectureCombos=${validLectureCombos}`);
-    console.log(`📈 DEBUG: Calculated maxVariantsPerCombo = Math.max(1, Math.ceil(${maxSchedules} / ${validLectureCombos})) = ${maxVariantsPerCombo}`);
-    console.log(`📈 Will generate max ${maxVariantsPerCombo} variant(s) per lecture combination`);
+    debugLog(`📈 DEBUG: maxSchedules=${maxSchedules}, validLectureCombos=${validLectureCombos}`);
+    debugLog(`📈 DEBUG: Calculated maxVariantsPerCombo = Math.max(1, Math.ceil(${maxSchedules} / ${validLectureCombos})) = ${maxVariantsPerCombo}`);
+    debugLog(`📈 Will generate max ${maxVariantsPerCombo} variant(s) per lecture combination`);
 
     // Generate schedules using backtracking with diversity prioritization
     const validSchedules = [];
@@ -46,8 +49,8 @@ function generateSchedules(coursesData, maxSchedules = 20) {
 
     backtrackWithDiversity(coursesSections, 0, [], validSchedules, seenSchedules, lectureComboCount, maxSchedules, maxVariantsPerCombo);
 
-    console.log(`✅ Generated ${validSchedules.length} diverse schedules`);
-    console.log(`📊 DEBUG: Lecture combo breakdown:`, lectureComboCount);
+    debugLog(`✅ Generated ${validSchedules.length} diverse schedules`);
+    debugLog(`📊 DEBUG: Lecture combo breakdown:`, lectureComboCount);
     return validSchedules;
 }
 
@@ -112,11 +115,11 @@ function shuffleArray(array) {
  */
 function logRequiredSections(coursesSections) {
     coursesSections.forEach(course => {
-        console.log(`\n${course.courseCode}:`);
-        console.log(`  - ${course.lectures.length} lecture(s)`);
-        console.log(`  - ${course.discussions.length} discussion(s)`);
-        console.log(`  - ${course.quizzes.length} quiz(zes)`);
-        console.log(`  - ${course.labs.length} lab(s)`);
+        debugLog(`\n${course.courseCode}:`);
+        debugLog(`  - ${course.lectures.length} lecture(s)`);
+        debugLog(`  - ${course.discussions.length} discussion(s)`);
+        debugLog(`  - ${course.quizzes.length} quiz(zes)`);
+        debugLog(`  - ${course.labs.length} lab(s)`);
     });
 }
 
@@ -186,7 +189,7 @@ function backtrackWithDiversity(courses, courseIndex, currentSchedule, validSche
                 seenSchedules.add(scheduleKey);
                 validSchedules.push([...currentSchedule]);
                 lectureComboCount[lectureComboKey]++;
-                console.log(`✓ Found schedule #${validSchedules.length}`);
+                debugLog(`✓ Found schedule #${validSchedules.length}`);
             }
         }
         return;

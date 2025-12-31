@@ -4,7 +4,10 @@
  * Renders schedule data into a visual weekly calendar grid using HTML table
  */
 
-console.log('📅 Calendar Renderer module loaded (v0 table layout)');
+const DEBUG = false;
+debugLog = DEBUG ? console.log.bind(console) : () => { };
+
+debugLog('📅 Calendar Renderer module loaded (v0 table layout)');
 
 // Initialize namespace
 if (!window.ScheduleBuilder) {
@@ -18,7 +21,7 @@ if (!window.ScheduleBuilder) {
  * @returns {HTMLElement} The calendar table
  */
 window.ScheduleBuilder.renderCalendar = function (schedule, container) {
-    console.log(`🗓️ Rendering calendar for schedule with ${schedule.length} sections`);
+    debugLog(`🗓️ Rendering calendar for schedule with ${schedule.length} sections`);
 
     // Clear container
     container.innerHTML = '';

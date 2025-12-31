@@ -4,7 +4,9 @@
  * Fetches all sections for given course codes by scraping WebReg department pages
  */
 
-console.log('📚 Course Fetcher module loaded');
+const DEBUG = false;
+const debugLog = DEBUG ? console.log.bind(console) : () => { };
+debugLog('📚 Course Fetcher module loaded');
 
 /**
  * Main function to fetch all sections for an array of course codes
@@ -13,7 +15,7 @@ console.log('📚 Course Fetcher module loaded');
  * @returns {Promise<Object[]>} Array of course objects with all their sections
  */
 async function fetchCoursesData(courseCodes, termId) {
-    console.log('🔍 Fetching courses:', courseCodes);
+    debugLog('🔍 Fetching courses:', courseCodes);
 
     const results = [];
 
@@ -45,18 +47,18 @@ async function fetchSingleCourse(courseCode, termId) {
     if (!dept || !number) {
         throw new Error(`Invalid course code format: ${courseCode}. Expected format: DEPT-NUMBER (e.g., CSCI-350)`);
     }
-    console.log(`📖 Fetching ${courseCode} from ${dept} department`);
+    debugLog(`📖 Fetching ${courseCode} from ${dept} department`);
     // PAGINATION FIX: Search multiple pages
     const MAX_PAGES = 10;
     for (let pageNum = 1; pageNum <= MAX_PAGES; pageNum++) {
         const departmentUrl = pageNum === 1
             ? `/Courses?Program=${dept}`
             : `/Courses?pageNumber=${pageNum}&Program=${dept}`;
-        console.log(`  📄 Checking page ${pageNum}...`);
+        debugLog(`  📄 Checking page ${pageNum}...`);
         try {
             const html = await fetchDepartmentPage(departmentUrl);
             const courseData = parseCourseFromHTML(html, courseCode);
-            console.log(`  ✓ Found ${courseCode} on page ${pageNum}`);
+            debugLog(`  ✓ Found ${courseCode} on page ${pageNum}`);
             return courseData;
         } catch (parseError) {
             // Course not on this page, try next
@@ -103,7 +105,7 @@ function parseCourseFromHTML(html, courseCode) {
     // Find course headers (same structure as CourseBin)
     const courseHeaders = doc.querySelectorAll('.course-header');
 
-    console.log(`Found ${courseHeaders.length} courses in ${courseCode.split('-')[0]} department`);
+    debugLog(`Found ${courseHeaders.length} courses in ${courseCode.split('-')[0]} department`);
 
     let targetCourse = null;
     let contentArea = null;
@@ -114,7 +116,7 @@ function parseCourseFromHTML(html, courseCode) {
         const courseId = header.querySelector('.crsID')?.textContent.replace(':', '').trim();
         foundCourses.push(courseId);
     }
-    console.log('Available courses:', foundCourses);
+    debugLog('Available courses:', foundCourses);
 
     // Search for our specific course
     for (const header of courseHeaders) {
@@ -173,7 +175,7 @@ function extractSectionsFromContentArea(contentArea) {
     // Log section availability stats
     const openCount = sections.filter(s => s.isOpen).length;
     const closedCount = sections.length - openCount;
-    console.log(`  📊 Extracted ${sections.length} sections: ${openCount} open, ${closedCount} closed`);
+    debugLog(`  📊 Extracted ${sections.length} sections: ${openCount} open, ${closedCount} closed`);
 
     return sections;
 }

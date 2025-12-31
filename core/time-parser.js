@@ -4,7 +4,11 @@
  * Parses time strings into comparable formats for conflict checking
  */
 
-console.log('⏰ Time Parser module loaded');
+// Debug configuration - set to true for development, false for production
+const DEBUG = false;
+const debugLog = DEBUG ? console.log.bind(console) : () => { };
+
+debugLog('⏰ Time Parser module loaded');
 
 /**
  * Parse a time string like "01:00pm-04:20pm" into start/end times
