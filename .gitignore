@@ -1,4 +1,5 @@
 .gemini/
 node_modules/
 .DS_Store
-*.md
+FUTURE_ROADMAP.md
+PROJECT_HANDBOOK.md

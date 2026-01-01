@@ -274,6 +274,11 @@ function renderScheduleBuilderUI() {
   // Try to load saved schedules from storage
   loadSchedulesFromStorage();
 
+  // Restore availability stats if they exist
+  if (window.lastFetchedCourses) {
+    displayAvailabilityStats(window.lastFetchedCourses);
+  }
+
   // Legacy: Restore state if schedules were previously generated (in-memory)
   // This handles cases where schedules exist but haven't been saved yet
   if (window.currentSchedules && window.currentSchedules.length > 0) {
@@ -527,7 +532,8 @@ async function handleGenerateSchedules() {
     // Filter to successful courses
     const successCourses = coursesData.filter(c => !c.error && c.sections.length > 0);
 
-    // Display availability stats to user
+    // Show stats
+    window.lastFetchedCourses = successCourses; // Save for tab switching persistence
     displayAvailabilityStats(successCourses);
 
     // Check if user wants to filter out closed sections
@@ -719,7 +725,8 @@ function saveSchedulesToStorage(schedules, index = 0) {
     'sb_schedules': schedules,
     'sb_currentIndex': index,
     'sb_timestamp': Date.now(),
-    'sb_inputCourses': inputValue
+    'sb_inputCourses': inputValue,
+    'sb_fetchedStats': window.lastFetchedCourses || null // Persist fetch stats
   }, () => {
     if (chrome.runtime.lastError) {
       debugLog('Error saving schedules:', chrome.runtime.lastError);
@@ -737,7 +744,8 @@ function loadSchedulesFromStorage() {
     'sb_schedules',
     'sb_currentIndex',
     'sb_timestamp',
-    'sb_inputCourses'
+    'sb_inputCourses',
+    'sb_fetchedStats'
   ], (result) => {
     if (chrome.runtime.lastError) {
       console.error('Error loading schedules:', chrome.runtime.lastError);
@@ -777,6 +785,13 @@ function loadSchedulesFromStorage() {
 
       // Display current schedule
       displaySchedule(window.currentScheduleIndex);
+
+      // Restore availability stats if saved
+      if (result.sb_fetchedStats) {
+        window.lastFetchedCourses = result.sb_fetchedStats;
+        displayAvailabilityStats(result.sb_fetchedStats);
+        debugLog('📊 Restored availability stats from storage');
+      }
 
       debugLog(`✅ Restored ${result.sb_schedules.length} schedules from storage`);
     }
