@@ -37,3 +37,11 @@
 ### 5. UI Polish
 - Better mobile responsiveness (though WebReg desktop is primary).
 - "Share Schedule" (export to image or link).
+
+
+
+### 6. User chosen number of schedules to generate
+**The Problem**: The current algorithm generates 20 schedules, which doesn't encompass everyone's needs.
+**The Fix**:
+- Add a slider or input field to control the number of schedules generated.
+- Update `schedule-generator.js` to respect this limit.
