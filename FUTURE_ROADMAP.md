@@ -1,14 +1,14 @@
 # Future Roadmap & Developer Notes
 
-## 🚨 High Priority (Critical for Correctness)
+## ✅ Completed
 
-### 1. Linked Sections Support
-**The Problem**: Currently, the algorithm assumes any discussion section can pair with any lecture. In reality, many courses (like CSCI-104 or CSCI-356) have "Linked Sections" where specific lectures must be paired with specific subsets of discussions/labs.
-**The Fix**:
-- Parse the WebReg HTML structure to detect these groupings (usually indented under the lecture).
-- Update `course-fetcher.js` to store this hierarchy.
-- Update `schedule-generator.js` to enforce these constraints during graph traversal.
-**Impact**: Prevents users from falling in love with a schedule that WebReg will reject.
+### 1. Linked Sections Support ✅ (v1.1)
+**Status**: Implemented and tested
+**Changes**:
+- Added `analyzeCourseStructure()` to detect INTERLEAVED, GROUPED, SINGLE_LECTURE, COMBINED patterns
+- Assigns `parentLectureId` to discussions in INTERLEAVED pattern
+- Schedule generator filters discussions based on chosen lecture
+- Test suite: `tests/test-linking-algorithm.js` (9/9 tests passing)
 
 ## 🚀 Medium Priority (Automation & UX)
 

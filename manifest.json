@@ -1,7 +1,8 @@
 {
-  "manifest_version": 4,
+  "manifest_version": 3,
   "name": "USC Schedule Builder",
   "version": "1.0.1",
+  "description": "Automatically generates all possible valid schedule combinations for USC students",
   "icons": {
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"

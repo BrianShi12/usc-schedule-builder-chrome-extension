@@ -142,10 +142,16 @@ function parseCourseFromHTML(html, courseCode) {
     // Extract sections from content area
     const sections = extractSectionsFromContentArea(contentArea);
 
+    // Analyze linking pattern and assign parentLectureId if needed
+    const linkingInfo = analyzeCourseStructure(sections);
+
+    debugLog(`  🔗 Detected linking pattern: ${linkingInfo.pattern}`);
+
     return {
         courseCode: courseCode,
         courseTitle: courseTitle,
-        sections: sections
+        sections: sections,
+        linkingPattern: linkingInfo.pattern
     };
 }
 
@@ -260,6 +266,80 @@ function extractSectionData(sectionElement) {
     });
 
     return data;
+}
+
+/**
+ * Analyze course structure to detect linking pattern and assign parentLectureId
+ * @param {Array} sections - Array of section objects
+ * @returns {Object} { pattern: 'INTERLEAVED'|'GROUPED'|'SINGLE_LECTURE'|'COMBINED' }
+ */
+function analyzeCourseStructure(sections) {
+    // Get section types
+    const lectures = sections.filter(s =>
+        s.type === 'Lecture' || s.type === 'Lecture-Discussion'
+    );
+    const discussions = sections.filter(s => s.type === 'Discussion');
+    const labs = sections.filter(s => s.type === 'Lab');
+
+    // Case 1: Combined "Lecture-Discussion" type (no separate discussions)
+    if (lectures.some(l => l.type === 'Lecture-Discussion') && discussions.length === 0) {
+        return { pattern: 'COMBINED' };
+    }
+
+    // Case 2: No discussions at all
+    if (discussions.length === 0) {
+        return { pattern: 'NO_DISCUSSIONS' };
+    }
+
+    // Case 3: Single lecture (all components belong to it)
+    if (lectures.length === 1) {
+        // Assign all discussions to the single lecture
+        const lectureId = lectures[0].sectionId;
+        discussions.forEach(d => {
+            d.parentLectureId = lectureId;
+        });
+        labs.forEach(l => {
+            l.parentLectureId = lectureId;
+        });
+        return { pattern: 'SINGLE_LECTURE' };
+    }
+
+    // Case 4: Detect INTERLEAVED vs GROUPED pattern
+    // Check if discussions appear BETWEEN lectures (Lec -> Disc -> Lec)
+    let lastLectureId = null;
+    let lastLectureIndex = -1;
+    let sawDiscAfterLec = false;
+    let sawLecAfterDisc = false;
+
+    sections.forEach((section, index) => {
+        if (section.type === 'Lecture') {
+            if (sawDiscAfterLec) {
+                sawLecAfterDisc = true;
+            }
+            lastLectureId = section.sectionId;
+            lastLectureIndex = index;
+        } else if (section.type === 'Discussion') {
+            if (lastLectureId !== null) {
+                sawDiscAfterLec = true;
+                // Tentatively assign to most recent lecture (used if INTERLEAVED)
+                section.parentLectureId = lastLectureId;
+            }
+        }
+    });
+
+    if (sawLecAfterDisc) {
+        // Pattern: Lec -> Disc -> Lec means INTERLEAVED (linked)
+        debugLog('  🔗 INTERLEAVED pattern detected - discussions linked to preceding lectures');
+        return { pattern: 'INTERLEAVED' };
+    } else {
+        // Pattern: All lectures first, then discussions means GROUPED (any-to-any)
+        // Clear the parentLectureId we tentatively assigned
+        discussions.forEach(d => {
+            delete d.parentLectureId;
+        });
+        debugLog('  🔗 GROUPED pattern detected - any discussion works with any lecture');
+        return { pattern: 'GROUPED' };
+    }
 }
 
 // Export functions for use in tab-injector.js

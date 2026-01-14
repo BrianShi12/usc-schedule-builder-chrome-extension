@@ -60,6 +60,7 @@ function groupSectionsByType(coursesData) {
         const sections = {
             courseCode: course.courseCode,
             courseTitle: course.courseTitle,
+            linkingPattern: course.linkingPattern || 'GROUPED',  // NEW: Store linking pattern
             lectures: [],
             discussions: [],
             quizzes: [],
@@ -229,8 +230,23 @@ function backtrackWithDiversity(courses, courseIndex, currentSchedule, validSche
  * Try combinations of discussions, quizzes, and labs with diversity focus
  */
 function tryOtherSectionsWithDiversity(course, currentSchedule, courses, courseIndex, validSchedules, seenSchedules, lectureComboCount, maxSchedules, maxVariantsPerCombo) {
+    // Get the chosen lecture for this course (should be the last lecture added for this course)
+    const chosenLecture = currentSchedule.find(s =>
+        s.courseCode === course.courseCode && s.type.toLowerCase().includes('lec')
+    );
+
+    // Filter discussions based on linking pattern
+    let validDiscussions = [...course.discussions];
+    if (course.linkingPattern === 'INTERLEAVED' && chosenLecture) {
+        // Only allow discussions that belong to the chosen lecture
+        validDiscussions = course.discussions.filter(d =>
+            d.parentLectureId === chosenLecture.sectionId
+        );
+        debugLog(`  🔗 INTERLEAVED: Filtered to ${validDiscussions.length} discussions for lecture ${chosenLecture.sectionId}`);
+    }
+
     // Shuffle sections for randomness
-    const shuffledDiscussions = [...course.discussions].sort(() => Math.random() - 0.5);
+    const shuffledDiscussions = validDiscussions.sort(() => Math.random() - 0.5);
     const shuffledQuizzes = [...course.quizzes].sort(() => Math.random() - 0.5);
     const shuffledLabs = [...course.labs].sort(() => Math.random() - 0.5);
 
