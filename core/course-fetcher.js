@@ -270,74 +270,54 @@ function extractSectionData(sectionElement) {
 
 /**
  * Analyze course structure to detect linking pattern and assign parentLectureId
+ * 
+ * Only 2 patterns matter:
+ * - INTERLEAVED: Lec → Disc → Lec → Disc (discussions belong to preceding lecture)
+ * - GROUPED: Everything else (any discussion works with any lecture)
+ * 
  * @param {Array} sections - Array of section objects
- * @returns {Object} { pattern: 'INTERLEAVED'|'GROUPED'|'SINGLE_LECTURE'|'COMBINED' }
+ * @returns {Object} { pattern: 'INTERLEAVED'|'GROUPED' }
  */
 function analyzeCourseStructure(sections) {
-    // Get section types
+    const discussions = sections.filter(s => s.type === 'Discussion');
+
+    // If no discussions or less than 2 lectures, no linking needed - default to GROUPED
     const lectures = sections.filter(s =>
         s.type === 'Lecture' || s.type === 'Lecture-Discussion'
     );
-    const discussions = sections.filter(s => s.type === 'Discussion');
-    const labs = sections.filter(s => s.type === 'Lab');
-
-    // Case 1: Combined "Lecture-Discussion" type (no separate discussions)
-    if (lectures.some(l => l.type === 'Lecture-Discussion') && discussions.length === 0) {
-        return { pattern: 'COMBINED' };
+    if (discussions.length === 0 || lectures.length < 2) {
+        return { pattern: 'GROUPED' };
     }
 
-    // Case 2: No discussions at all
-    if (discussions.length === 0) {
-        return { pattern: 'NO_DISCUSSIONS' };
-    }
-
-    // Case 3: Single lecture (all components belong to it)
-    if (lectures.length === 1) {
-        // Assign all discussions to the single lecture
-        const lectureId = lectures[0].sectionId;
-        discussions.forEach(d => {
-            d.parentLectureId = lectureId;
-        });
-        labs.forEach(l => {
-            l.parentLectureId = lectureId;
-        });
-        return { pattern: 'SINGLE_LECTURE' };
-    }
-
-    // Case 4: Detect INTERLEAVED vs GROUPED pattern
-    // Check if discussions appear BETWEEN lectures (Lec -> Disc -> Lec)
+    // Detect INTERLEAVED: Look for Lecture → Discussion → Lecture pattern
     let lastLectureId = null;
-    let lastLectureIndex = -1;
     let sawDiscAfterLec = false;
     let sawLecAfterDisc = false;
 
-    sections.forEach((section, index) => {
+    sections.forEach((section) => {
         if (section.type === 'Lecture') {
             if (sawDiscAfterLec) {
                 sawLecAfterDisc = true;
             }
             lastLectureId = section.sectionId;
-            lastLectureIndex = index;
         } else if (section.type === 'Discussion') {
             if (lastLectureId !== null) {
                 sawDiscAfterLec = true;
-                // Tentatively assign to most recent lecture (used if INTERLEAVED)
+                // Assign to most recent lecture (used if INTERLEAVED)
                 section.parentLectureId = lastLectureId;
             }
         }
     });
 
     if (sawLecAfterDisc) {
-        // Pattern: Lec -> Disc -> Lec means INTERLEAVED (linked)
-        debugLog('  🔗 INTERLEAVED pattern detected - discussions linked to preceding lectures');
+        // INTERLEAVED: discussions are linked to preceding lectures
+        debugLog('  🔗 INTERLEAVED: Discussions linked to preceding lectures');
         return { pattern: 'INTERLEAVED' };
     } else {
-        // Pattern: All lectures first, then discussions means GROUPED (any-to-any)
+        // GROUPED: any discussion works with any lecture
         // Clear the parentLectureId we tentatively assigned
-        discussions.forEach(d => {
-            delete d.parentLectureId;
-        });
-        debugLog('  🔗 GROUPED pattern detected - any discussion works with any lecture');
+        discussions.forEach(d => { delete d.parentLectureId; });
+        debugLog('  🔗 GROUPED: Any discussion works with any lecture');
         return { pattern: 'GROUPED' };
     }
 }

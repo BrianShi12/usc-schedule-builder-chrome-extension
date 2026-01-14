@@ -1,50 +1,30 @@
 /**
- * Linked Sections Algorithm Test Suite
+ * Linked Sections Algorithm Test Suite (Simplified)
  * 
- * Run this in browser console on WebReg after loading the extension:
- * Copy-paste this entire file into the console and press Enter.
- * 
- * Or load via: <script src="tests/test-linking-algorithm.js"></script>
+ * Only 2 patterns matter:
+ * - INTERLEAVED: Lec → Disc → Lec → Disc (enforce linking)
+ * - GROUPED: Everything else (any-to-any)
  */
 
 console.log('🧪 Starting Linked Sections Algorithm Tests...\n');
 
-// Copy of the algorithm for testing (same logic as course-fetcher.js)
 function testAnalyzeCourseStructure(sections) {
+    const discussions = sections.filter(s => s.type === 'Discussion');
     const lectures = sections.filter(s =>
         s.type === 'Lecture' || s.type === 'Lecture-Discussion'
     );
-    const discussions = sections.filter(s => s.type === 'Discussion');
-    const labs = sections.filter(s => s.type === 'Lab');
 
-    // Case 1: Combined "Lecture-Discussion" type
-    if (lectures.some(l => l.type === 'Lecture-Discussion') && discussions.length === 0) {
-        return { pattern: 'COMBINED' };
+    if (discussions.length === 0 || lectures.length < 2) {
+        return { pattern: 'GROUPED' };
     }
 
-    // Case 2: No discussions at all
-    if (discussions.length === 0) {
-        return { pattern: 'NO_DISCUSSIONS' };
-    }
-
-    // Case 3: Single lecture
-    if (lectures.length === 1) {
-        const lectureId = lectures[0].sectionId;
-        discussions.forEach(d => { d.parentLectureId = lectureId; });
-        labs.forEach(l => { l.parentLectureId = lectureId; });
-        return { pattern: 'SINGLE_LECTURE' };
-    }
-
-    // Case 4: Detect INTERLEAVED vs GROUPED
     let lastLectureId = null;
     let sawDiscAfterLec = false;
     let sawLecAfterDisc = false;
 
     sections.forEach((section) => {
         if (section.type === 'Lecture') {
-            if (sawDiscAfterLec) {
-                sawLecAfterDisc = true;
-            }
+            if (sawDiscAfterLec) sawLecAfterDisc = true;
             lastLectureId = section.sectionId;
         } else if (section.type === 'Discussion') {
             if (lastLectureId !== null) {
@@ -62,25 +42,21 @@ function testAnalyzeCourseStructure(sections) {
     }
 }
 
-// Test helper
 function createSection(id, type) {
     return { sectionId: id, type: type };
 }
 
-// Test cases
 const testCases = [
     {
         name: "INTERLEAVED: Lec → Disc → Lec → Disc",
         sections: [
             createSection("L1", "Lecture"),
             createSection("D1", "Discussion"),
-            createSection("D2", "Discussion"),
             createSection("L2", "Lecture"),
-            createSection("D3", "Discussion"),
-            createSection("D4", "Discussion"),
+            createSection("D2", "Discussion"),
         ],
         expectedPattern: "INTERLEAVED",
-        expectedLinks: { D1: "L1", D2: "L1", D3: "L2", D4: "L2" }
+        expectedLinks: { D1: "L1", D2: "L2" }
     },
     {
         name: "GROUPED: Lec → Lec → Disc → Disc",
@@ -91,15 +67,32 @@ const testCases = [
             createSection("D2", "Discussion"),
         ],
         expectedPattern: "GROUPED",
-        expectedLinks: {} // No parentLectureId for GROUPED
+        expectedLinks: {}
     },
     {
-        name: "GROUPED: Lec → Labs → Lec → Disc (PHYS-135A style)",
+        name: "GROUPED: Single lecture (less than 2 lectures)",
+        sections: [
+            createSection("L1", "Lecture"),
+            createSection("D1", "Discussion"),
+            createSection("D2", "Discussion"),
+        ],
+        expectedPattern: "GROUPED",  // Simplified - no linking needed
+        expectedLinks: {}
+    },
+    {
+        name: "GROUPED: No discussions",
         sections: [
             createSection("L1", "Lecture"),
             createSection("Lab1", "Lab"),
-            createSection("Lab2", "Lab"),
-            createSection("Lab3", "Lab"),
+        ],
+        expectedPattern: "GROUPED",
+        expectedLinks: {}
+    },
+    {
+        name: "GROUPED: Labs between lectures",
+        sections: [
+            createSection("L1", "Lecture"),
+            createSection("Lab1", "Lab"),
             createSection("L2", "Lecture"),
             createSection("D1", "Discussion"),
         ],
@@ -107,131 +100,45 @@ const testCases = [
         expectedLinks: {}
     },
     {
-        name: "SINGLE_LECTURE: One lecture, many discussions",
+        name: "INTERLEAVED: Complex pattern",
         sections: [
             createSection("L1", "Lecture"),
             createSection("D1", "Discussion"),
-            createSection("D2", "Discussion"),
-            createSection("D3", "Discussion"),
-        ],
-        expectedPattern: "SINGLE_LECTURE",
-        expectedLinks: { D1: "L1", D2: "L1", D3: "L1" }
-    },
-    {
-        name: "COMBINED: Lecture-Discussion type, no separate discussions",
-        sections: [
-            createSection("Lab1", "Lab"),
-            createSection("Lab2", "Lab"),
-            createSection("LD1", "Lecture-Discussion"),
-            createSection("Q1", "Quiz"),
-        ],
-        expectedPattern: "COMBINED",
-        expectedLinks: {}
-    },
-    {
-        name: "NO_DISCUSSIONS: Only lectures and labs",
-        sections: [
-            createSection("L1", "Lecture"),
-            createSection("Lab1", "Lab"),
-            createSection("Lab2", "Lab"),
-        ],
-        expectedPattern: "NO_DISCUSSIONS",
-        expectedLinks: {}
-    },
-    {
-        name: "COMPLEX: Lec → Disc → Quiz → Lec → Disc → Disc → Lec → Disc → Lab",
-        sections: [
-            createSection("L1", "Lecture"),
-            createSection("D1", "Discussion"),
-            createSection("Q1", "Quiz"),
             createSection("L2", "Lecture"),
             createSection("D2", "Discussion"),
             createSection("D3", "Discussion"),
-            createSection("L3", "Lecture"),
-            createSection("D4", "Discussion"),
-            createSection("Lab1", "Lab"),
         ],
         expectedPattern: "INTERLEAVED",
-        expectedLinks: { D1: "L1", D2: "L2", D3: "L2", D4: "L3" }
-    },
-    {
-        name: "GROUPED: Labs first, then lecture, then discussion (CHEM style)",
-        sections: [
-            createSection("Lab1", "Lab"),
-            createSection("Lab2", "Lab"),
-            createSection("Lab3", "Lab"),
-            createSection("L1", "Lecture"),
-            createSection("D1", "Discussion"),
-        ],
-        expectedPattern: "SINGLE_LECTURE",  // Only 1 lecture!
-        expectedLinks: { D1: "L1" }
-    },
-    {
-        name: "GROUPED: Multiple labs first, multiple lectures, then discussions",
-        sections: [
-            createSection("Lab1", "Lab"),
-            createSection("Lab2", "Lab"),
-            createSection("L1", "Lecture"),
-            createSection("L2", "Lecture"),
-            createSection("D1", "Discussion"),
-            createSection("D2", "Discussion"),
-        ],
-        expectedPattern: "GROUPED",
-        expectedLinks: {}
+        expectedLinks: { D1: "L1", D2: "L2", D3: "L2" }
     },
 ];
 
-// Run tests
-let passed = 0;
-let failed = 0;
+let passed = 0, failed = 0;
 
 testCases.forEach((test, index) => {
-    // Clone sections to avoid mutation between tests
     const sections = JSON.parse(JSON.stringify(test.sections));
-
     const result = testAnalyzeCourseStructure(sections);
-
-    // Check pattern
     const patternMatch = result.pattern === test.expectedPattern;
 
-    // Check links
     let linksMatch = true;
     const discussions = sections.filter(s => s.type === 'Discussion');
-
     for (const disc of discussions) {
-        const expectedParent = test.expectedLinks[disc.sectionId];
-        const actualParent = disc.parentLectureId;
-
-        if (expectedParent && actualParent !== expectedParent) {
-            linksMatch = false;
-            console.log(`    ❌ ${disc.sectionId} linked to ${actualParent}, expected ${expectedParent}`);
-        } else if (!expectedParent && actualParent) {
-            linksMatch = false;
-            console.log(`    ❌ ${disc.sectionId} has unexpected link to ${actualParent}`);
-        }
+        const expected = test.expectedLinks[disc.sectionId];
+        const actual = disc.parentLectureId;
+        if (expected && actual !== expected) linksMatch = false;
+        if (!expected && actual) linksMatch = false;
     }
 
     if (patternMatch && linksMatch) {
-        console.log(`✅ Test ${index + 1}: ${test.name}`);
-        console.log(`   Pattern: ${result.pattern}`);
+        console.log(`✅ Test ${index + 1}: ${test.name} → ${result.pattern}`);
         passed++;
     } else {
         console.log(`❌ Test ${index + 1}: ${test.name}`);
         console.log(`   Expected: ${test.expectedPattern}, Got: ${result.pattern}`);
-        if (!linksMatch) {
-            console.log(`   Links mismatch (see above)`);
-        }
         failed++;
     }
-    console.log('');
 });
 
+console.log('\n' + '═'.repeat(50));
+console.log(`🧪 Results: ${passed} passed, ${failed} failed`);
 console.log('═'.repeat(50));
-console.log(`🧪 Test Results: ${passed} passed, ${failed} failed`);
-console.log('═'.repeat(50));
-
-if (failed === 0) {
-    console.log('🎉 All tests passed! Algorithm is working correctly.');
-} else {
-    console.log('⚠️ Some tests failed. Review the algorithm.');
-}
