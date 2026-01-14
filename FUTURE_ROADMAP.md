@@ -45,3 +45,8 @@
 **The Fix**:
 - Add a slider or input field to control the number of schedules generated.
 - Update `schedule-generator.js` to respect this limit.
+
+### 7. Improve schedule generation algorithm
+- Should include randomization so that is it not deterministic and a new schedule can be generated every single time. 
+- Should be an option to regenerate the schedules
+

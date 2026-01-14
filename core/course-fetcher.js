@@ -10,17 +10,16 @@ debugLog('📚 Course Fetcher module loaded');
 /**
  * Main function to fetch all sections for an array of course codes
  * @param {string[]} courseCodes - Array of course codes (e.g., ["CSCI-350", "MATH-225"])
- * @param {string} termId - Term ID (e.g., "20261" for Spring 2026)
  * @returns {Promise<Object[]>} Array of course objects with all their sections
  */
-async function fetchCoursesData(courseCodes, termId) {
+async function fetchCoursesData(courseCodes) {
     debugLog('🔍 Fetching courses:', courseCodes);
 
     const results = [];
 
     for (const courseCode of courseCodes) {
         try {
-            const courseData = await fetchSingleCourse(courseCode, termId);
+            const courseData = await fetchSingleCourse(courseCode);
             results.push(courseData);
         } catch (error) {
             console.error(`Error fetching ${courseCode}:`, error);
@@ -38,10 +37,9 @@ async function fetchCoursesData(courseCodes, termId) {
 /**
  * Fetch all sections for a single course
  * @param {string} courseCode - Course code (e.g., "CSCI-350")
- * @param {string} termId - Term ID
  * @returns {Promise<Object>} Course object with all sections
  */
-async function fetchSingleCourse(courseCode, termId) {
+async function fetchSingleCourse(courseCode) {
     const [dept, number] = courseCode.split('-');
     if (!dept || !number) {
         throw new Error(`Invalid course code format: ${courseCode}. Expected format: DEPT-NUMBER (e.g., CSCI-350)`);
@@ -264,31 +262,6 @@ function extractSectionData(sectionElement) {
     return data;
 }
 
-/**
- * Get current term ID from the page
- * @returns {string} Term ID (e.g., "20261")
- */
-function getCurrentTermId() {
-    // Try to find term from the active term tab
-    const termTab = document.querySelector('#activeTermTab');
-    if (termTab) {
-        const termText = termTab.textContent.trim();
-        // Parse term code from text if possible
-        // Format might be "Spring 2026" - we'd need to convert to "20261"
-        // For now, return a placeholder
-        return '20261'; // TODO: Parse from page
-    }
-
-    // Fallback: try to extract from URL or other page elements
-    const urlMatch = window.location.search.match(/term=(\d+)/);
-    if (urlMatch) {
-        return urlMatch[1];
-    }
-
-    return '20261'; // Default fallback
-}
-
 // Export functions for use in tab-injector.js
 window.ScheduleBuilder = window.ScheduleBuilder || {};
 window.ScheduleBuilder.fetchCoursesData = fetchCoursesData;
-window.ScheduleBuilder.getCurrentTermId = getCurrentTermId;

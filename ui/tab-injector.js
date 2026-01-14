@@ -439,11 +439,7 @@ function attachScheduleBuilderEventListeners() {
     });
   }
 
-  // Add to CourseBin button
-  const addBtn = document.getElementById('addToCourseBinBtn');
-  if (addBtn) {
-    addBtn.addEventListener('click', handleAddToCourseBin);
-  }
+  // Note: Add to CourseBin button is hidden (feature incomplete)
 
   // Start Over button
   const startOverBtn = document.getElementById('startOverBtn');
@@ -505,14 +501,11 @@ async function handleGenerateSchedules() {
       return;
     }
 
-    // Get current term ID
-    const termId = window.ScheduleBuilder.getCurrentTermId();
-
     // Show which courses we're fetching
     updateLoadingProgress(`Fetching: ${courses.join(', ')}`);
 
-    // Fetch all course data
-    const coursesData = await window.ScheduleBuilder.fetchCoursesData(courses, termId);
+    // Fetch all course data (uses WebReg session cookies for term handling)
+    const coursesData = await window.ScheduleBuilder.fetchCoursesData(courses);
 
     debugLog('✅ Fetched course data:', coursesData);
 
@@ -705,14 +698,7 @@ function navigateSchedule(direction) {
   });
 }
 
-/**
- * Handle Add to CourseBin button
- */
-function handleAddToCourseBin() {
-  debugLog('Add to CourseBin clicked!');
-  // TODO: Phase 5 - Implement auto-add functionality
-  alert('Auto-add feature coming in Phase 5!');
-}
+// Note: handleAddToCourseBin removed (button is hidden, feature incomplete)
 
 /**
  * Save schedules to chrome.storage for persistence
