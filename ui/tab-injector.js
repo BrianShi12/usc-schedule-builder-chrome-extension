@@ -837,13 +837,19 @@ function showError(message) {
 }
 
 /**
- * Display availability stats for courses
+ * Display availability stats for courses (XSS-safe implementation)
  */
 function displayAvailabilityStats(courses) {
   const statsContainer = document.getElementById('availabilityStats');
   if (!statsContainer) return;
 
-  let html = '<h4>📊 Section Availability</h4>';
+  // Clear container safely
+  statsContainer.innerHTML = '';
+
+  // Create header
+  const header = document.createElement('h4');
+  header.textContent = '📊 Section Availability';
+  statsContainer.appendChild(header);
 
   courses.forEach(course => {
     const totalSections = course.sections.length;
@@ -879,16 +885,28 @@ function displayAvailabilityStats(courses) {
       .map(([type, counts]) => `${type}: ${counts.open}/${counts.total}`)
       .join(', ');
 
-    html += `
-      <div class="course-availability">
-        <span class="course-code">${course.courseCode}</span>
-        <span class="availability-badge ${badgeClass}">${statusText}</span>
-        <span class="section-details">${typeDetails}</span>
-      </div>
-    `;
+    // Create elements safely using textContent (XSS-safe)
+    const div = document.createElement('div');
+    div.className = 'course-availability';
+
+    const codeSpan = document.createElement('span');
+    codeSpan.className = 'course-code';
+    codeSpan.textContent = course.courseCode || 'Unknown';  // Safe!
+
+    const badgeSpan = document.createElement('span');
+    badgeSpan.className = `availability-badge ${badgeClass}`;
+    badgeSpan.textContent = statusText;
+
+    const detailsSpan = document.createElement('span');
+    detailsSpan.className = 'section-details';
+    detailsSpan.textContent = typeDetails;
+
+    div.appendChild(codeSpan);
+    div.appendChild(badgeSpan);
+    div.appendChild(detailsSpan);
+    statsContainer.appendChild(div);
   });
 
-  statsContainer.innerHTML = html;
   statsContainer.style.display = 'block';
 }
 

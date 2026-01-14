@@ -194,15 +194,21 @@ function placeSectionOnCalendar(section, tbody, courseColors) {
 
 /**
  * Parse days string into day codes
+ * Uses the shared parseDays from time-parser.js to avoid duplication
  */
 function parseDays(daysStr) {
+    // Use exported version from time-parser.js if available
+    if (window.ScheduleBuilder && window.ScheduleBuilder.parseDays) {
+        return window.ScheduleBuilder.parseDays(daysStr);
+    }
+
+    // Fallback (should not be needed, but defensive coding)
     if (!daysStr || daysStr === 'TBA') return [];
 
     const days = [];
     let i = 0;
 
     while (i < daysStr.length) {
-        // Check for "Th" first
         if (daysStr.substring(i, i + 2) === 'Th') {
             days.push('Th');
             i += 2;

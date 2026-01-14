@@ -64,13 +64,15 @@ async function fetchSingleCourse(courseCode) {
             }
         }
     }
+    // Safety: should never reach here, but guard against unexpected loop exit
+    throw new Error(`Course ${courseCode} not found`);
 }
 
 /**
- * Fetch a department page's HTML
- * @param {string} url - Department URL
- * @returns {Promise<string>} HTML content
- */
+     * Fetch a department page's HTML
+     * @param {string} url - Department URL
+     * @returns {Promise<string>} HTML content
+     */
 async function fetchDepartmentPage(url) {
     try {
         const response = await fetch(url);
