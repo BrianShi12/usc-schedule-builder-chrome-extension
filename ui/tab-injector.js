@@ -338,12 +338,12 @@ function getScheduleBuilderHTML() {
             </div>
 
             <!-- Schedule Count Slider -->
-            <div style="margin-top: 12px;">
-              <label style="display: flex; align-items: center; gap: 12px; font-weight: normal;">
-                <span>Schedules to generate:</span>
-                <input type="range" id="scheduleCount" min="5" max="50" value="20" style="width: 150px;">
-                <span id="scheduleCountDisplay" style="min-width: 30px; font-weight: bold;">20</span>
-              </label>
+            <div class="schedule-count-container">
+              <span class="schedule-count-label">Schedules to generate:</span>
+              <div class="schedule-count-controls">
+                <input type="range" id="scheduleCount" class="schedule-slider" min="5" max="50" value="20">
+                <input type="number" id="scheduleCountInput" class="schedule-count-input" min="5" max="50" value="20">
+              </div>
             </div>
           </div>
 
@@ -479,12 +479,29 @@ function attachScheduleBuilderEventListeners() {
     });
   }
 
-  // Schedule count slider - update display on change
+  // Schedule count - bidirectional sync between slider and number input
   const scheduleCountSlider = document.getElementById('scheduleCount');
-  const scheduleCountDisplay = document.getElementById('scheduleCountDisplay');
-  if (scheduleCountSlider && scheduleCountDisplay) {
+  const scheduleCountInput = document.getElementById('scheduleCountInput');
+
+  if (scheduleCountSlider && scheduleCountInput) {
+    // Slider changes → update input
     scheduleCountSlider.addEventListener('input', () => {
-      scheduleCountDisplay.textContent = scheduleCountSlider.value;
+      scheduleCountInput.value = scheduleCountSlider.value;
+    });
+
+    // Input changes → update slider (with validation)
+    scheduleCountInput.addEventListener('input', () => {
+      let val = parseInt(scheduleCountInput.value) || 20;
+      val = Math.max(5, Math.min(50, val));  // Clamp to 5-50
+      scheduleCountSlider.value = val;
+    });
+
+    // On blur, enforce valid value in input
+    scheduleCountInput.addEventListener('blur', () => {
+      let val = parseInt(scheduleCountInput.value) || 20;
+      val = Math.max(5, Math.min(50, val));
+      scheduleCountInput.value = val;
+      scheduleCountSlider.value = val;
     });
   }
 }
