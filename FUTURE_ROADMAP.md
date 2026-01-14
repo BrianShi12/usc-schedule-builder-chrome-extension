@@ -40,11 +40,12 @@
 
 
 
-### 6. User chosen number of schedules to generate
-**The Problem**: The current algorithm generates 20 schedules, which doesn't encompass everyone's needs.
-**The Fix**:
-- Add a slider or input field to control the number of schedules generated.
-- Update `schedule-generator.js` to respect this limit.
+### 6. User-Chosen Schedule Count ✅ (v1.2)
+**Status**: Implemented
+**Changes**:
+- Added slider (5-50 range, default 20) to UI
+- Live display of selected value
+- generateSchedules() now respects user's choice
 
 ### 7. Improve schedule generation algorithm
 - Should include randomization so that is it not deterministic and a new schedule can be generated every single time. 

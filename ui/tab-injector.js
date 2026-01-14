@@ -336,6 +336,15 @@ function getScheduleBuilderHTML() {
                 <span>Only include sections with available seats</span>
               </label>
             </div>
+
+            <!-- Schedule Count Slider -->
+            <div style="margin-top: 12px;">
+              <label style="display: flex; align-items: center; gap: 12px; font-weight: normal;">
+                <span>Schedules to generate:</span>
+                <input type="range" id="scheduleCount" min="5" max="50" value="20" style="width: 150px;">
+                <span id="scheduleCountDisplay" style="min-width: 30px; font-weight: bold;">20</span>
+              </label>
+            </div>
           </div>
 
           <!-- Loading Section -->
@@ -469,6 +478,15 @@ function attachScheduleBuilderEventListeners() {
       }
     });
   }
+
+  // Schedule count slider - update display on change
+  const scheduleCountSlider = document.getElementById('scheduleCount');
+  const scheduleCountDisplay = document.getElementById('scheduleCountDisplay');
+  if (scheduleCountSlider && scheduleCountDisplay) {
+    scheduleCountSlider.addEventListener('input', () => {
+      scheduleCountDisplay.textContent = scheduleCountSlider.value;
+    });
+  }
 }
 
 /**
@@ -572,8 +590,12 @@ async function handleGenerateSchedules() {
     // Generate schedules (run asynchronously to keep UI responsive)
     setTimeout(() => {
       try {
+        // Get user's desired schedule count from slider
+        const scheduleCountSlider = document.getElementById('scheduleCount');
+        const maxSchedules = scheduleCountSlider ? parseInt(scheduleCountSlider.value) : 20;
+
         // Use coursesToUse which respects the checkbox setting
-        const schedules = window.ScheduleBuilder.generateSchedules(coursesToUse, 20);
+        const schedules = window.ScheduleBuilder.generateSchedules(coursesToUse, maxSchedules);
 
         if (schedules.length === 0) {
           showError('No valid schedules found. Your selected courses may have too many time conflicts.');
