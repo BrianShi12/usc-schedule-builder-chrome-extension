@@ -329,20 +329,16 @@ function getScheduleBuilderHTML() {
               </button>
             </div>
 
-            <!-- Checkbox Filter -->
-            <div style="margin-top: 12px;">
-              <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal;">
+            <!-- Options Row -->
+            <div style="margin-top: 12px; display: flex; align-items: center; gap: 30px; flex-wrap: wrap;">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal;">
                 <input type="checkbox" id="onlyOpenSections" checked>
                 <span>Only include sections with available seats</span>
               </label>
-            </div>
-
-            <!-- Schedule Count Slider -->
-            <div class="schedule-count-container">
-              <span class="schedule-count-label">Schedules to generate:</span>
-              <div class="schedule-count-controls">
-                <input type="range" id="scheduleCount" class="schedule-slider" min="5" max="50" value="20">
-                <input type="number" id="scheduleCountInput" class="schedule-count-input" min="5" max="50" value="20">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 16px; line-height: 24px;">Max schedules:</span>
+                <input type="range" id="scheduleCount" min="5" max="50" value="20" style="width: 80px; height: 24px; margin: 0;">
+                <input type="number" id="scheduleCountInput" min="5" max="50" value="20" style="width: 40px; height: 24px; padding: 0 4px; margin: 0; text-align: center; font-size: 14px; box-sizing: border-box;">
               </div>
             </div>
           </div>

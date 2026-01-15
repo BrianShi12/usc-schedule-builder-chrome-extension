@@ -5,7 +5,7 @@
  */
 
 // Debug configuration - set to true for development, false for production
-const DEBUG = false;
+const DEBUG = true;
 const debugLog = DEBUG ? console.log.bind(console) : () => { };
 
 debugLog('⏰ Time Parser module loaded');

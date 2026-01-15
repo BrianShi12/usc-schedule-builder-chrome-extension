@@ -37,6 +37,8 @@
 ### 5. UI Polish
 - Better mobile responsiveness (though WebReg desktop is primary).
 - "Share Schedule" (export to image or link).
+- Migrate to React.
+
 
 
 
@@ -47,7 +49,15 @@
 - Live display of selected value
 - generateSchedules() now respects user's choice
 
-### 7. Improve schedule generation algorithm
-- Should include randomization so that is it not deterministic and a new schedule can be generated every single time. 
-- Should be an option to regenerate the schedules
+### 7. ~~Improve schedule generation algorithm~~ ✅ Already has randomness
+- Algorithm already shuffles sections before generating
+- Each generation produces different results
+- No regenerate button needed
 
+### 8. Migrate to React
+**The Problem**: Vanilla JS with inline styles is hard to maintain and style consistently.
+**The Fix**:
+- Set up Vite + React build pipeline
+- Convert UI components to React (input form, calendar, schedule display)
+- Use CSS modules or styled-components for cleaner styling
+- Build outputs to `dist/` folder, load that as the extension

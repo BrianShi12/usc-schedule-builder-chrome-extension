@@ -9,6 +9,7 @@ debugLog('📅 Schedule Generator module loaded');
 
 /**
  * Generate valid schedules from course data
+ * Uses round-robin approach: generates diverse schedules by cycling through lecture combinations
  */
 function generateSchedules(coursesData, maxSchedules = 20) {
     debugLog('🔄 Starting schedule generation');
@@ -25,31 +26,86 @@ function generateSchedules(coursesData, maxSchedules = 20) {
 
     logRequiredSections(coursesSections);
 
-    // Count actual valid lecture combinations (non-conflicting)
-    const validLectureCombos = countValidLectureCombinations(coursesSections);
-    debugLog(`📊 DEBUG: Found ${validLectureCombos} valid (non-conflicting) lecture combinations`);
-
-    // Adaptively determine how many variants per lecture combo
-    // If many lecture combos: focus on lecture diversity (1-2 variants each)
-    // If few lecture combos: focus on section diversity (more variants each)
-    const maxVariantsPerCombo = validLectureCombos > 0
-        ? Math.max(1, Math.ceil(maxSchedules / validLectureCombos))
-        : maxSchedules;
-
-    debugLog(`📈 DEBUG: maxSchedules=${maxSchedules}, validLectureCombos=${validLectureCombos}`);
-    debugLog(`📈 DEBUG: Calculated maxVariantsPerCombo = Math.max(1, Math.ceil(${maxSchedules} / ${validLectureCombos})) = ${maxVariantsPerCombo}`);
-    debugLog(`📈 Will generate max ${maxVariantsPerCombo} variant(s) per lecture combination`);
-
-    // Generate schedules using backtracking with diversity prioritization
-    const validSchedules = [];
+    // Step 1: Generate ALL valid schedules (with a reasonable cap to avoid infinite loops)
+    const allSchedules = [];
     const seenSchedules = new Set();
-    const lectureComboCount = {}; // Track how many schedules per lecture combo
+    const absoluteMax = 500; // Safety cap to prevent performance issues
 
-    backtrackWithDiversity(coursesSections, 0, [], validSchedules, seenSchedules, lectureComboCount, maxSchedules, maxVariantsPerCombo);
+    debugLog(`📈 Generating all valid schedules (up to ${absoluteMax} for performance)...`);
 
-    debugLog(`✅ Generated ${validSchedules.length} diverse schedules`);
-    debugLog(`📊 DEBUG: Lecture combo breakdown:`, lectureComboCount);
-    return validSchedules;
+    generateAllSchedules(coursesSections, 0, [], allSchedules, seenSchedules, absoluteMax);
+
+    debugLog(`📊 Found ${allSchedules.length} total valid schedules`);
+
+    if (allSchedules.length === 0) {
+        return [];
+    }
+
+    // Step 2: Group schedules by lecture combination
+    const schedulesByLectureCombo = {};
+
+    for (const schedule of allSchedules) {
+        const lectureComboKey = schedule
+            .filter(s => s.type.toLowerCase().includes('lec'))
+            .map(s => s.sectionId)
+            .sort()
+            .join(',');
+
+        if (!schedulesByLectureCombo[lectureComboKey]) {
+            schedulesByLectureCombo[lectureComboKey] = [];
+        }
+        schedulesByLectureCombo[lectureComboKey].push(schedule);
+    }
+
+    const lectureComboKeys = Object.keys(schedulesByLectureCombo);
+    debugLog(`� Found ${lectureComboKeys.length} unique lecture combinations`);
+
+    // Shuffle within each combo for variety
+    for (const key of lectureComboKeys) {
+        schedulesByLectureCombo[key].sort(() => Math.random() - 0.5);
+    }
+
+    // Shuffle the order of lecture combos for variety
+    lectureComboKeys.sort(() => Math.random() - 0.5);
+
+    // Step 3: Round-robin selection until maxSchedules reached
+    const finalSchedules = [];
+    const comboIndices = {}; // Track current index for each combo
+
+    for (const key of lectureComboKeys) {
+        comboIndices[key] = 0;
+    }
+
+    let pass = 0;
+    while (finalSchedules.length < maxSchedules) {
+        let addedThisPass = false;
+
+        for (const key of lectureComboKeys) {
+            if (finalSchedules.length >= maxSchedules) break;
+
+            const comboSchedules = schedulesByLectureCombo[key];
+            const idx = comboIndices[key];
+
+            if (idx < comboSchedules.length) {
+                finalSchedules.push(comboSchedules[idx]);
+                comboIndices[key]++;
+                addedThisPass = true;
+            }
+        }
+
+        pass++;
+
+        // If we couldn't add any schedules this pass, we've exhausted all options
+        if (!addedThisPass) {
+            debugLog(`📊 Exhausted all schedules after ${pass} passes`);
+            break;
+        }
+    }
+
+    debugLog(`✅ Generated ${finalSchedules.length} diverse schedules (requested: ${maxSchedules})`);
+    debugLog(`📊 Distribution across ${lectureComboKeys.length} lecture combos`);
+
+    return finalSchedules;
 }
 
 /**
@@ -156,6 +212,114 @@ function countValidLectureCombinations(courses) {
 
     countLectures(0, []);
     return count;
+}
+
+/**
+ * Generate all valid schedules up to absoluteMax
+ * Simple backtracking without any per-combo limits
+ */
+function generateAllSchedules(courses, courseIndex, currentSchedule, allSchedules, seenSchedules, absoluteMax) {
+    // Stop if we've hit the safety cap
+    if (allSchedules.length >= absoluteMax) {
+        return;
+    }
+
+    // Base case: processed all courses - we have a valid schedule!
+    if (courseIndex >= courses.length) {
+        const scheduleKey = currentSchedule.map(s => s.sectionId).sort().join(',');
+
+        if (!seenSchedules.has(scheduleKey)) {
+            seenSchedules.add(scheduleKey);
+            allSchedules.push([...currentSchedule]);
+        }
+        return;
+    }
+
+    const course = courses[courseIndex];
+
+    // Must have at least one lecture
+    if (course.lectures.length === 0) {
+        console.warn(`❌ ${course.courseCode} has no lectures, skipping`);
+        return;
+    }
+
+    // Shuffle lectures for variety
+    const shuffledLectures = [...course.lectures].sort(() => Math.random() - 0.5);
+
+    // Try each lecture
+    for (const lecture of shuffledLectures) {
+        if (allSchedules.length >= absoluteMax) return;
+
+        if (hasConflict(lecture, currentSchedule)) {
+            continue;
+        }
+
+        currentSchedule.push(lecture);
+
+        // Try all section combinations for this lecture
+        tryAllSections(course, currentSchedule, courses, courseIndex, allSchedules, seenSchedules, absoluteMax);
+
+        currentSchedule.pop();
+    }
+}
+
+/**
+ * Try all combinations of discussions, quizzes, and labs for the current course
+ */
+function tryAllSections(course, currentSchedule, courses, courseIndex, allSchedules, seenSchedules, absoluteMax) {
+    // Get the chosen lecture for linking
+    const chosenLecture = currentSchedule.find(s =>
+        s.courseCode === course.courseCode && s.type.toLowerCase().includes('lec')
+    );
+
+    // Filter discussions based on linking pattern
+    let validDiscussions = [...course.discussions];
+    if (course.linkingPattern === 'INTERLEAVED' && chosenLecture) {
+        validDiscussions = course.discussions.filter(d =>
+            d.parentLectureId === chosenLecture.sectionId
+        );
+    }
+
+    // Shuffle sections for variety
+    const shuffledDiscussions = validDiscussions.sort(() => Math.random() - 0.5);
+    const shuffledQuizzes = [...course.quizzes].sort(() => Math.random() - 0.5);
+    const shuffledLabs = [...course.labs].sort(() => Math.random() - 0.5);
+
+    // Only include null if there are NO sections of that type
+    const discussionChoices = shuffledDiscussions.length > 0 ? shuffledDiscussions : [null];
+    const quizChoices = shuffledQuizzes.length > 0 ? shuffledQuizzes : [null];
+    const labChoices = shuffledLabs.length > 0 ? shuffledLabs : [null];
+
+    // Try all combinations
+    for (const discussion of discussionChoices) {
+        if (allSchedules.length >= absoluteMax) return;
+        if (discussion && hasConflict(discussion, currentSchedule)) continue;
+
+        if (discussion) currentSchedule.push(discussion);
+
+        for (const quiz of quizChoices) {
+            if (allSchedules.length >= absoluteMax) break;
+            if (quiz && hasConflict(quiz, currentSchedule)) continue;
+
+            if (quiz) currentSchedule.push(quiz);
+
+            for (const lab of labChoices) {
+                if (allSchedules.length >= absoluteMax) break;
+                if (lab && hasConflict(lab, currentSchedule)) continue;
+
+                if (lab) currentSchedule.push(lab);
+
+                // Move to next course
+                generateAllSchedules(courses, courseIndex + 1, currentSchedule, allSchedules, seenSchedules, absoluteMax);
+
+                if (lab) currentSchedule.pop();
+            }
+
+            if (quiz) currentSchedule.pop();
+        }
+
+        if (discussion) currentSchedule.pop();
+    }
 }
 
 /**

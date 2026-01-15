@@ -151,16 +151,31 @@ function placeSectionOnCalendar(section, tbody, courseColors) {
             return;
         }
 
+        // Constants for positioning
+        const PIXELS_PER_HOUR = 40; // Match CSS row height
+        const MARGIN = 2; // Top/bottom spacing
+
+        // Calculate vertical position within the hour row
+        // For example: 9:30am in the 9:00am row should be offset by (30/60) * 40 = 20px
+        const topOffset = (startMin / 60) * PIXELS_PER_HOUR + MARGIN;
+
         // Calculate duration
         const startTimeInHours = startHour + startMin / 60;
         const endTimeInHours = endHour + endMin / 60;
         const durationInHours = endTimeInHours - startTimeInHours;
 
+        // Calculate height (subtract both top and bottom margins)
+        const blockHeight = durationInHours * PIXELS_PER_HOUR - (MARGIN * 2);
+
         // Create course block
         const block = document.createElement('div');
         block.className = 'course-block';
         block.style.backgroundColor = courseColors[section.courseCode] || '#70ad47';
-        block.style.height = `${durationInHours * 40 - 4}px`; // 40px per hour row minus margin
+        block.style.position = 'absolute';
+        block.style.top = `${topOffset}px`;
+        block.style.height = `${blockHeight}px`;
+        block.style.left = '2px';  // Horizontal margin
+        block.style.right = '2px'; // Full width minus margins
 
         // Block content - Format: COURSE-CODE (sectionId) on line 1, time on line 2
         // SECURITY: Use textContent instead of innerHTML to prevent XSS
